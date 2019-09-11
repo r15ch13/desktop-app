@@ -2,6 +2,7 @@ import { app, protocol, BrowserWindow, shell, ipcMain } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 import Store from './electron-store';
+import os from 'os';
 
 const { Client } = require('discord-rpc');
 const rpc = new Client({ transport: 'ipc' });
@@ -73,6 +74,13 @@ async function createWindow() {
 		event.preventDefault();
 		shell.openExternal(url);
 	});
+
+	if (process.platform === 'win32' && os.release().startsWith('10.')) {
+		try {
+			const controls = require('./win10');
+			controls(ipcMain, win.webContents);
+		} catch {}
+	}
 
 	await rpc.login({ clientId: '383375119827075072' });
 
